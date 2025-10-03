@@ -5,7 +5,8 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-from chatbot_crew import ChatBotCrew, add_to_conversation
+from chatbot_crew import ChatBotCrew
+from db import add_to_conversation
 from env import TELEGRAM_BOT_TOKEN
 
 
