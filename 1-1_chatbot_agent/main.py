@@ -9,7 +9,7 @@ from telegram.ext import (
     filters,
 )
 from env import GEMINI_API_KEY, OPENAI_API_KEY, TELEGRAM_BOT_TOKEN
-from tools import web_search_tool
+from tools import google_search_tool, naver_search_tool, web_search_tool
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
@@ -30,7 +30,7 @@ class ChatBotCrew:
             어떤 질문이든 그 본질을 파악하고, 웹 검색과 같은 강력한 도구를 활용하여 사용자에게 가장 필요한 맞춤형 답변을 제공하는 것을 사명으로 삼고 있습니다.
             """,
             llm="gemini/gemini-2.0-flash-lite",
-            tools=[web_search_tool],
+            tools=[naver_search_tool, google_search_tool],
         )
 
     @task
