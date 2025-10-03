@@ -1,223 +1,148 @@
-from typing import Type
+from typing import Dict, Type, Any
 from crewai.tools import BaseTool
 from firecrawl import Firecrawl
+import feedparser
 import requests
-import re
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from env import (
     FIRECRAWL_API_KEY,
-    NAVER_API_CLIENT_ID,
-    NAVER_API_SECRET_KEY,
-    GOOGLE_SEARCH_API_KEY,
-    GOOGLE_SEARCH_CX,
 )
 
 
-class NaverSearchToolInput(BaseModel):
-    """Input schema for NaverSearchTool."""
+class Article(BaseModel):
+    title: str
+    link: str
+    summary: str
+    published: str
+    source: str
 
-    query: str = Field(..., description="The search query to look for.")
-    display: int = Field(
-        default=10, description="Number of search results to display (max 100)."
-    )
+
+class ScrapeResult(BaseModel):
+    title: str
+    url: str
+    content: str
 
 
-class NaverSearchTool(BaseTool):
-    name: str = "naver_search_tool"
-    description: str = (
-        "Searches Naver for Korean web content based on a query and returns relevant results with titles, URLs, and descriptions."
-    )
-    args_schema: Type[BaseModel] = NaverSearchToolInput
+class NewsFeedConfig(BaseModel):
+    feeds: Dict[str, HttpUrl]
 
-    def _run(self, query: str, display: int = 10):
+
+def _get_rss(rss_feeds: dict[str, str], each: int = 10):
+    all_articles = []
+
+    for source_name, feed_url in rss_feeds.items():
         try:
-            url = "https://openapi.naver.com/v1/search/webkr"
-            headers = {
-                "X-Naver-Client-Id": NAVER_API_CLIENT_ID,
-                "X-Naver-Client-Secret": NAVER_API_SECRET_KEY,
-                "Content-Type": "application/json",
-            }
+            response = requests.get(feed_url, timeout=10)
+            if response.status_code == 200:
+                feed = feedparser.parse(response.content)
 
-            params = {"query": query, "display": min(display, 100)}  # API limit is 100
+                for entry in feed.entries[:each]:
+                    article = Article(
+                        title=getattr(entry, "title", "No Title"),
+                        link=getattr(entry, "link", ""),
+                        summary=getattr(entry, "summary", "No Summary"),
+                        published=getattr(entry, "published", ""),
+                        source=source_name,
+                    )
+                    all_articles.append(article)
 
-            print(f"[DEBUG] Making request to Naver API with query: {query}")
+        except Exception:
+            continue
 
-            response = requests.get(url, headers=headers, params=params)
-            response.raise_for_status()
-
-            data = response.json()
-
-            print(f"[DEBUG] Raw response type: {type(data)}")
-            print(f"[DEBUG] Raw response: {data}")
-
-            if "items" not in data or not data["items"]:
-                return f"No search results found for query: {query}"
-
-            search_results = []
-
-            for item in data["items"]:
-                title = item.get("title", "No Title")
-                # Remove HTML tags from title
-                title = re.sub(r"<[^>]+>", "", title)
-
-                url = item.get("link", "")
-                description = item.get("description", "")
-                # Remove HTML tags from description
-                description = re.sub(r"<[^>]+>", "", description)
-
-                search_results.append(
-                    {
-                        "title": title,
-                        "url": url,
-                        "content": (
-                            description[:500] + "..."
-                            if len(description) > 500
-                            else description
-                        ),
-                    }
-                )
-
-            result = {
-                "query": query,
-                "results_count": len(search_results),
-                "total": data.get("total", 0),
-                "results": search_results,
-            }
-
-            print("DEBUG : ", result)
-
-            return result
-
-        except Exception as e:
-            return f"Error searching for query '{query}': {e}"
+    return all_articles
 
 
-class GoogleSearchToolInput(BaseModel):
-    """Input schema for GoogleSearchTool."""
-
-    query: str = Field(..., description="The search query to look for.")
-    num: int = Field(
-        default=10, description="Number of search results to display (max 10)."
+class GlobalNewsRssToolInput(BaseModel):
+    each: int = Field(
+        default=10, description="Number of articles to fetch from each RSS feed."
     )
 
 
-class GoogleSearchTool(BaseTool):
-    name: str = "google_search_tool"
+class GlobalNewsRssTool(BaseTool):
+    name: str = "global_news_rss_tool"
+    description: str = "Global News RSS Tool. Collects news articles from major international RSS feeds."
+    args_schema: Type[BaseModel] = GlobalNewsRssToolInput
+
+    def _run(self, each: int = 10):
+        global_rss_feeds = NewsFeedConfig(
+            feeds={
+                "Google News": "https://news.google.com/rss/search?q=global",
+                "BBC": "https://feeds.bbci.co.uk/news/world/rss.xml",
+                "CNN": "https://rss.cnn.com/rss/edition.rss",
+            }
+        )
+
+        return _get_rss(global_rss_feeds.feeds, each)
+
+
+class KoreanNewsRssToolInput(BaseModel):
+    each: int = Field(
+        default=10, description="Number of articles to fetch from each RSS feed."
+    )
+
+
+class KoreanNewsRssTool(BaseTool):
+    name: str = "korean_news_rss_tool"
     description: str = (
-        "Searches Google for information based on a query and returns relevant results with titles, URLs, and snippets."
+        "Korean News RSS Tool. Collects news articles from major Korean news outlets."
     )
-    args_schema: Type[BaseModel] = GoogleSearchToolInput
+    args_schema: Type[BaseModel] = KoreanNewsRssToolInput
 
-    def _run(self, query: str, num: int = 10):
-        try:
-            url = "https://www.googleapis.com/customsearch/v1"
-            params = {
-                "key": GOOGLE_SEARCH_API_KEY,
-                "cx": GOOGLE_SEARCH_CX,
-                "q": query,
-                "num": min(num, 10),  # API limit is 10
+    def _run(self, each: int = 10):
+        korean_rss_feeds = NewsFeedConfig(
+            feeds={
+                "연합뉴스": "https://www.yna.co.kr/rss/news.xml",
+                "조선일보": "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml",
+                "동아일보": "https://rss.donga.com/total.xml",
+                "경향신문": "https://www.khan.co.kr/rss/rssdata/total_news.xml",
+                "SBS": "https://news.sbs.co.kr/news/TopicRssFeed.do?plink=RSSREADER",
+                "매일경제": "https://www.mk.co.kr/rss/30000001/",
+                "한국경제": "https://www.hankyung.com/feed/all-news",
             }
+        )
 
-            print(
-                f"[DEBUG] Making request to Google Custom Search API with query: {query}"
-            )
-
-            response = requests.get(url, params=params)
-            response.raise_for_status()
-
-            data = response.json()
-
-            print(f"[DEBUG] Raw response type: {type(data)}")
-            print(f"[DEBUG] Raw response: {data}")
-
-            if "items" not in data or not data["items"]:
-                return f"No search results found for query: {query}"
-
-            search_results = []
-
-            for item in data["items"]:
-                title = item.get("title", "No Title")
-                url = item.get("link", "")
-                snippet = item.get("snippet", "")
-
-                search_results.append(
-                    {
-                        "title": title,
-                        "url": url,
-                        "content": (
-                            snippet[:500] + "..." if len(snippet) > 500 else snippet
-                        ),
-                    }
-                )
-
-            result = {
-                "query": query,
-                "results_count": len(search_results),
-                "total": data.get("searchInformation", {}).get("totalResults", 0),
-                "results": search_results,
-            }
-
-            print("DEBUG : ", result)
-
-            return result
-
-        except Exception as e:
-            return f"Error searching for query '{query}': {e}"
-
-
-def _web_search(query: str):
-    firecrawl = Firecrawl(api_key=FIRECRAWL_API_KEY)
-
-    response = firecrawl.search(query, limit=5, integration="crewai")
-
-    if not response:
-        return f"No search results found for query: {query}"
-
-    search_results = []
-
-    if response.web:
-        for result in response.web:
-            title = getattr(result, "title", "No Title")
-            url = getattr(result, "url", "")
-            description = getattr(result, "description", "")
-
-            search_results.append(
-                {
-                    "title": title,
-                    "url": url,
-                    "content": (
-                        description[:500] + "..."
-                        if len(description) > 500
-                        else description
-                    ),
-                }
-            )
-        search_result = {
-            "query": query,
-            "results_count": len(search_results),
-            "results": search_results,
-        }
-        return search_result
+        return _get_rss(korean_rss_feeds.feeds, each)
 
 
 class WebSearchToolInput(BaseModel):
-    """Input schema for WebSearchTool."""
-
-    query: str = Field(..., description="The search query to look for.")
+    url: str = Field(..., description="The URL to scrape content from.")
 
 
 class WebSearchTool(BaseTool):
     name: str = "web_search_tool"
-    description: str = (
-        "Searches the web for information based on a query and returns relevant results with titles, URLs, and content snippets."
-    )
+    description: str = "Web Content Scraper Tool. This tool scrapes the content of a specific URL and returns it in text format."
     args_schema: Type[BaseModel] = WebSearchToolInput
 
-    def _run(self, query: str):
-        return _web_search(query)
+    def _run(self, url: str):
+        try:
+            app = Firecrawl(api_key=FIRECRAWL_API_KEY)
+
+            response = app.scrape(url)
+
+            if not response:
+                return f"Failed to scrape content from URL: {url}"
+
+            title = "No Title"
+            content = ""
+
+            if response.metadata:
+                title = response.metadata.title
+
+            if response.content:
+                content = response.content
+            elif response.text:
+                content = response.text
+            elif response.markdown:
+                content = response.markdown
+
+            result = ScrapeResult(title=title, url=url, content=content)
+
+            return result
+
+        except Exception as e:
+            return f"Error scraping URL {url}: {e}"
 
 
 web_search_tool = WebSearchTool()
-naver_search_tool = NaverSearchTool()
-google_search_tool = GoogleSearchTool()
-# print(_web_search("블랙핑크"))
+global_news_rss_tool = GlobalNewsRssTool()
+korean_news_rss_tool = KoreanNewsRssTool()

@@ -2,6 +2,7 @@ import os
 from crewai import Crew, Agent, Task
 from crewai.project import CrewBase, task, agent, crew
 from env import OPENAI_API_KEY
+from tools import global_news_rss_tool, korean_news_rss_tool, web_search_tool
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
@@ -24,7 +25,7 @@ class NewsCrew:
             """,
             llm="openai/o4-mini",
             verbose=True,
-            tools=[],
+            tools=[global_news_rss_tool, korean_news_rss_tool],
         )
 
     @task
@@ -117,7 +118,7 @@ class NewsCrew:
             """,
             llm="openai/o4-mini",
             verbose=True,
-            tools=[],
+            tools=[web_search_tool],
         )
 
     @task
@@ -201,21 +202,21 @@ class NewsCrew:
             **필수 작업 순서:**
 
             1. **이전 Task 결과 활용**:
-               - edit_and_summarize_articles_task에서 생성된 모든 편집 완료된 기사 데이터를 분석합니다.
-               - 각 기사의 중요도 점수, 카테고리, 내용을 종합적으로 평가합니다.
+                edit_and_summarize_articles_task에서 생성된 모든 편집 완료된 기사 데이터를 분석합니다.
+                각 기사의 중요도 점수, 카테고리, 내용을 종합적으로 평가합니다.
 
             2. **뉴스 선별 기준**:
-               - 중요도 점수가 양호한 기사들을 우선 고려합니다 (7점 이상 우선)
-               - 글로벌 뉴스는 전체의 30% 정도 (3개)로 제한합니다
-               - 한국 뉴스는 전체의 70% 정도 (7개)로 구성합니다
-               - 다양한 카테고리의 균형을 맞춥니다 (정치/경제/사회/국제 등)
-               - 시의성과 사회적 파급효과를 고려합니다
+                중요도 점수가 양호한 기사들을 우선 고려합니다 (7점 이상 우선)
+                글로벌 뉴스는 전체의 30% 정도 (3개)로 제한합니다
+                한국 뉴스는 전체의 70% 정도 (7개)로 구성합니다
+                다양한 카테고리의 균형을 맞춥니다 (정치/경제/사회/국제 등)
+                시의성과 사회적 파급효과를 고려합니다
 
             3. **최종 리포트 작성**:
-               - 선별된 10개 기사를 보기 좋게 정리합니다
-               - 각 기사별로 헤드라인, 요약, 원문 소스, 출처를 명확히 표시합니다
-               - 전체적인 뉴스 동향에 대한 간단한 요약을 추가합니다
-               - 독자가 이해하기 쉬운 형태로 구성합니다
+                선별된 10개 기사를 보기 좋게 정리합니다
+                각 기사별로 헤드라인, 요약, 원문 소스, 출처를 명확히 표시합니다
+                전체적인 뉴스 동향에 대한 간단한 요약을 추가합니다
+                독자가 이해하기 쉬운 형태로 구성합니다
 
             **선별 우선순위:**
             1. 중요도 점수 (7점 이상)
@@ -297,3 +298,7 @@ class NewsCrew:
             ],
             verbose=True,
         )
+
+
+news_crew = NewsCrew()
+news_crew.crew().kickoff()
