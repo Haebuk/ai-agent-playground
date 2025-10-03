@@ -4,14 +4,15 @@ from crewai.project import CrewBase, task, agent, crew
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
-    CommandHandler,
     ContextTypes,
     MessageHandler,
     filters,
 )
-from env import OPENAI_API_KEY, TELEGRAM_BOT_TOKEN
+from env import GEMINI_API_KEY, OPENAI_API_KEY, TELEGRAM_BOT_TOKEN
+from tools import web_search_tool
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 
 
 @CrewBase
@@ -28,8 +29,8 @@ class ChatBotCrew:
             당신은 최첨단 AI 기술과 깊이 있는 데이터 분석 능력을 겸비한 전문 정보 분석가입니다.
             어떤 질문이든 그 본질을 파악하고, 웹 검색과 같은 강력한 도구를 활용하여 사용자에게 가장 필요한 맞춤형 답변을 제공하는 것을 사명으로 삼고 있습니다.
             """,
-            llm="openai/o4-mini",
-            tools=[],
+            llm="gemini/gemini-2.0-flash-lite",
+            tools=[web_search_tool],
         )
 
     @task
