@@ -1,0 +1,26 @@
+[
+    {
+        "sector": "생성형 AI & 대형 언어모델 (LLM)",
+        "companies": ["NVDA", "MSFT", "GOOGL"],
+        "growth_potential": "Very High",
+        "investment_rationale": "GPU 전용 칩 성능 향상 및 대규모 데이터·클라우드 인프라 확산으로 AI 학습·추론 수요가 폭증하고, 시장 선도기업 투자 시 초고수익 가능"
+    },
+    {
+        "sector": "양자 컴퓨팅 및 양자 암호통신",
+        "companies": ["IBM", "IONQ", "RGTI"],
+        "growth_potential": "High",
+        "investment_rationale": "정부·국방 대규모 투자와 금융·제약 분야 양자우위 알고리즘 수요가 증가하며, 기술 상용화 시점(2027~2030년) 전후 급격한 밸류업 기대"
+    },
+    {
+        "sector": "엣지 AI & IoT",
+        "companies": ["QCOM", "NXPI", "AMZN"],
+        "growth_potential": "Very High",
+        "investment_rationale": "5G/6G 통신망 확장으로 실시간 저지연 AI 처리 수요가 증가하고, 스마트팩토리·스마트시티·자율로봇 시장 확장에 따른 다양한 투자 기회 및 M&A 모멘텀 기대"
+    },
+    {
+        "sector": "자율주행 차량 & 로보틱스",
+        "companies": ["TSLA", "APTV", "MBLY"],
+        "growth_potential": "High",
+        "investment_rationale": "전기차 확산 및 레벨3~4 자율주행 상용화, 고성능 센서·AI 기술 고도화로 물류·로보틱스 수요가 급증하며 플랫폼 전반에 걸친 투자 기회"
+    }
+]

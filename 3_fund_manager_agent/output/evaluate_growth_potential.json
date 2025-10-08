@@ -1,0 +1,50 @@
+[
+    {
+        "ticker": "NVDA",
+        "company": "NVIDIA Corporation",
+        "growth_score": 10.0,
+        "growth_factors": [
+            "AI·데이터센터 GPU 수요 급증",
+            "CUDA 생태계 및 소프트웨어 스택 독점적 리더십",
+            "차세대 LLM·자율주행·로보틱스 확장"
+        ],
+        "financial_highlights": {
+            "revenue_growth": "52.3%",
+            "rd_investment": "$5.10B (20.3% of revenue)",
+            "market_position": "AI GPU 시장 점유율 약 80%; CUDA 생태계 리더십"
+        },
+        "investment_rationale": "고속 성장 주도 기술 포트폴리오 활용 이익 극대화 및 안정적 데이터센터·AI 클라우드 계약으로 지속적 캐시플로우 확보"
+    },
+    {
+        "ticker": "GOOGL",
+        "company": "Alphabet Inc.",
+        "growth_score": 7.0,
+        "growth_factors": [
+            "AI 기반 검색 광고 타겟팅 효율화",
+            "YouTube·Google Cloud 연평균 25% 이상 성장",
+            "Waymo·DeepMind 중심 미래 기술 연구"
+        ],
+        "financial_highlights": {
+            "revenue_growth": "19.8%",
+            "rd_investment": "$31.6B (15% of revenue)",
+            "market_position": "전세계 검색 시장 점유율 90% 이상; 광고·클라우드 통합 플랫폼 경쟁력"
+        },
+        "investment_rationale": "안정적 검색 광고 수익 기반 위에 클라우드·AI 투자로 수익 다각화 및 신성장 동력 확보"
+    },
+    {
+        "ticker": "MSFT",
+        "company": "Microsoft Corporation",
+        "growth_score": 6.0,
+        "growth_factors": [
+            "Azure 클라우드 및 AI 서비스 연평균 29% 성장",
+            "Office 365·Dynamics 365 구독 기반 안정적 매출",
+            "GitHub Copilot 등 AI 개발자 생태계 확장"
+        ],
+        "financial_highlights": {
+            "revenue_growth": "15.2%",
+            "rd_investment": "$22.7B (12% of revenue)",
+            "market_position": "엔터프라이즈·클라우드 시장 강자; 하이브리드·멀티클라우드 솔루션 리더십"
+        },
+        "investment_rationale": "구독형·클라우드 비즈니스 확대를 통한 예측 가능한 매출 성장 및 보안·규제 솔루션 결합으로 진입장벽 강화"
+    }
+]
