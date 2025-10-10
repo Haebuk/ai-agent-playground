@@ -44,9 +44,7 @@ class WebSearchToolInput(BaseModel):
 
 class WebSearchTool(BaseTool):
     name: str = "web_search_tool"
-    description: str = (
-        "Searches the web for information based on a query and returns relevant results with titles, URLs, and content snippets."
-    )
+    description: str = "Searches the web for information based on a query and returns relevant results with titles, URLs, and content snippets."
     args_schema: Type[BaseModel] = WebSearchToolInput
 
     def _run(self, query: str):
