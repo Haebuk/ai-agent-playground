@@ -1,0 +1,16 @@
+[project]
+name = "agent-a-to-z"
+version = "0.1.0"
+description = "탄탄한 AI 에이전트 A to Z"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "crewai[tools]>=0.177.0",
+    "dotenv>=0.9.9",
+    "python-telegram-bot>=22.3",
+    "crewai-tools>=0.69.0",
+    "langchain-community==0.3.29",
+    "langchain-openai==0.2.14",
+    "tiktoken>=0.11.0",
+    "pypdf>=5.9.0",
+]
